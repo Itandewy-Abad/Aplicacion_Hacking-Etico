@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escáner de Puertos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Escáner de Puertos</h1>
+        <label for="ip">IP o Dominio:</label>
+        <input type="text" id="ip" placeholder="Ej: scanme.nmap.org">
+        
+        <label for="puertos">Rango de Puertos (opcional):</label>
+        <input type="text" id="puertos" placeholder="Ej: 20-1000">
+
+        <button onclick="escanearPuertos()">Escanear</button>
+
+        <h2>Resultados:</h2>
+        <pre id="resultado"></pre>
+    </div>
+
+    <script>
+        async function escanearPuertos() {
+            const ip = document.getElementById("ip").value;
+            const puertos = document.getElementById("puertos").value || "1-1024";
+            const resultado = document.getElementById("resultado");
+            
+            if (!ip) {
+                alert("Por favor, ingresa una IP o dominio.");
+                return;
+            }
+
+            resultado.textContent = "Escaneando...";
+
+            const response = await fetch("/escanear", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ip, puertos }),
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                resultado.textContent = "❌ " + data.error;
+            } else {
+                resultado.textContent = JSON.stringify(data.puertos_abiertos, null, 2);
+            }
+        }
+    </script>
+</body>
+</html>
